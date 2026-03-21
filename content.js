@@ -1,21 +1,6 @@
-const HIDE_SELECTORS = [
-  'ytd-rich-section-renderer:has(a[href^="/shorts"])',
-  'ytd-reel-shelf-renderer',
-  'ytd-reel-item-renderer',
-  'a[href^="/shorts"]',
-  'ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])',
-  'ytd-guide-entry-renderer:has(a[href^="/shorts"])',
-  'ytd-watch-next-secondary-results-renderer',
-  '#secondary #related',
-  'ytd-item-section-renderer[section-identifier="related-items"]',
-  '#secondary ytd-compact-video-renderer',
-  '#secondary ytd-compact-radio-renderer',
-  '#secondary ytd-compact-playlist-renderer',
-  '#secondary ytd-compact-movie-renderer',
-  'ytd-browse[page-subtype="home"] ytd-rich-grid-renderer #contents ytd-rich-item-renderer',
-  'ytd-rich-grid-renderer #contents ytd-rich-shelf-renderer',
-  'ytd-browse[page-subtype="home"] ytd-shelf-renderer'
-];
+const HIDE_SELECTORS = ['ytd-rich-section-renderer:has(a[href^="/shorts"])'];
+const SHORTS_LINK_SELECTOR = 'a[href^="/shorts"]';
+const SHORTS_SECTION_SELECTOR = "ytd-rich-section-renderer";
 
 const style = document.createElement("style");
 style.textContent = `
@@ -34,6 +19,23 @@ const clearShortsFromGrid = () => {
   });
 };
 
+const hideShortsSectionContainers = () => {
+  const shortsLinks = document.querySelectorAll(SHORTS_LINK_SELECTOR);
+  shortsLinks.forEach((shortsLink) => {
+    const sectionContainer = shortsLink.closest(SHORTS_SECTION_SELECTOR);
+    if (!sectionContainer || sectionContainer.dataset.ekagraHidden === "true") {
+      return;
+    }
+    sectionContainer.dataset.ekagraHidden = "true";
+    sectionContainer.style.setProperty("display", "none", "important");
+    sectionContainer.querySelectorAll("*").forEach((childNode) => {
+      if (childNode instanceof HTMLElement) {
+        childNode.style.setProperty("display", "none", "important");
+      }
+    });
+  });
+};
+
 const redirectShortsPage = () => {
   if (location.pathname.startsWith("/shorts")) {
     location.replace("https://www.youtube.com/");
@@ -42,6 +44,7 @@ const redirectShortsPage = () => {
 
 const enforceFocusMode = () => {
   redirectShortsPage();
+  hideShortsSectionContainers();
   clearShortsFromGrid();
 };
 
